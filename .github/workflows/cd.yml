@@ -1,0 +1,45 @@
+name: CD - Deploy to Kubernetes
+
+on:
+  workflow_run:
+    workflows: ["CI - Build and Test"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > ~/.kube/config
+
+      - name: Deploy backend
+        run: |
+          kubectl set image deployment/backend \
+            backend=gaus13/careerlens-backend:${{ github.sha }} \
+            -n dev
+          kubectl rollout status deployment/backend -n dev --timeout=120s
+
+      - name: Deploy frontend
+        run: |
+          kubectl set image deployment/frontend \
+            frontend=gaus13/careerlens-frontend:${{ github.sha }} \
+            -n dev
+          kubectl rollout status deployment/frontend -n dev --timeout=120s
+
+      - name: Verify pods healthy
+        run: |
+          kubectl wait --for=condition=ready pod \
+            -l app=backend -n dev --timeout=120s
+          kubectl wait --for=condition=ready pod \
+            -l app=frontend -n dev --timeout=120s

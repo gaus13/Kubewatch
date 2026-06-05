@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: careerlens-config
+  namespace: dev
+data:
+  POSTGRES_DB: "careerlens"
+  POSTGRES_USER: "postgres"
+  ENVIRONMENT: "dev"
+  BACKEND_URL: "http://backend-service:8000"
