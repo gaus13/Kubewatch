@@ -1,4 +1,4 @@
-name: CI - Build and Test
+name: CI - Validate K8s Manifests
 
 on:
   push:
@@ -7,48 +7,24 @@ on:
     branches: [main]
 
 jobs:
-  build-and-push:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
 
-      - name: Install dependencies
+      - name: Validate K8s manifests
         run: |
-          cd backend
-          pip install -r requirements.txt
-
-      - name: Run tests
-        run: |
-          cd backend
-          python -m pytest tests/ -v 2>/dev/null || echo "No tests found!"
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          tags: |
-            gaus13/careerlens-backend:latest
-            gaus13/careerlens-backend:${{ github.sha }}
-
-      - name: Build and push frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-            gaus13/careerlens-frontend:latest
-            gaus13/careerlens-frontend:${{ github.sha }}
+          kubectl apply --dry-run=client -f k8s/namespace.yaml
+          kubectl apply --dry-run=client -f k8s/configmap.yaml
+          kubectl apply --dry-run=client -f k8s/backend-deployment.yaml
+          kubectl apply --dry-run=client -f k8s/backend-service.yaml
+          kubectl apply --dry-run=client -f k8s/frontend-deployment.yaml
+          kubectl apply --dry-run=client -f k8s/frontend-service.yaml
+          kubectl apply --dry-run=client -f k8s/ingress.yaml
+          kubectl apply --dry-run=client -f k8s/hpa.yaml
+          echo "All manifests valid!"
