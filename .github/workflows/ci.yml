@@ -1,4 +1,23 @@
-- name: Validate K8s manifests
+name: CI - Validate K8s Manifests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Validate K8s manifests
         run: |
           kubectl apply --dry-run=client --validate=false -f k8s/namespace.yaml
           kubectl apply --dry-run=client --validate=false -f k8s/configmap.yaml
