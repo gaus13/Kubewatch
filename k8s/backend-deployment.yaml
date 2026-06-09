@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: gaus13/careerlens-backend:latest
+        image: 495671352433.dkr.ecr.ap-south-1.amazonaws.com/careerlens-backend:latest
         ports:
         - containerPort: 8000
         env:
@@ -24,6 +24,16 @@ spec:
             secretKeyRef:
               name: careerlens-secret
               key: DATABASE_URL
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: careerlens-secret
+              key: SECRET_KEY
+        - name: OPENROUTER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: careerlens-secret
+              key: OPENROUTER_API_KEY
         - name: ENVIRONMENT
           valueFrom:
             configMapKeyRef:

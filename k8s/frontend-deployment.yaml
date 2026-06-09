@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: gaus13/careerlens-frontend:latest
+        image: 495671352433.dkr.ecr.ap-south-1.amazonaws.com/careerlens-frontend:latest
         ports:
         - containerPort: 80
         resources:
