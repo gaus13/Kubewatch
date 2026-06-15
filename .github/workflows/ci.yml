@@ -1,37 +1,44 @@
+```yaml
 name: CI - Validate K8s Manifests
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate YAML syntax
+      - name: Validate Kubernetes YAML files
         run: |
-          echo "Validating K8s manifests..."
-          find k8s/ -name "*.yaml" | while read file; do
+          echo "Validating Kubernetes manifests..."
+
+          for file in $(find k8s -name "*.yaml"); do
+            echo "Checking $file"
+
             python3 -c "
-import yaml, sys
-try:
-    list(yaml.safe_load_all(open('$file')))
-    print('OK:', '$file')
-except Exception as e:
-    print('FAIL:', '$file', str(e))
-    sys.exit(1)
+import yaml
+with open('$file', 'r') as f:
+    list(yaml.safe_load_all(f))
+print('✅ Valid:', '$file')
 "
           done
-          echo "All manifests valid!"
 
-      - name: Check Terraform files
+          echo "✅ All Kubernetes manifests are valid."
+
+      - name: Check Terraform files exist
         run: |
           echo "Checking Terraform files..."
+
           ls terraform/*.tf
-          echo "All Terraform files present!"
+
+          echo "✅ All Terraform files are present."
+```
