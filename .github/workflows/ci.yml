@@ -1,44 +1,31 @@
-```yaml
+# Overwrite the file completely
+cat > ~/careerlens-k8s/.github/workflows/ci.yml << 'EOF'
 name: CI - Validate K8s Manifests
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Validate Kubernetes YAML files
+      - name: Validate YAML syntax
         run: |
-          echo "Validating Kubernetes manifests..."
-
-          for file in $(find k8s -name "*.yaml"); do
-            echo "Checking $file"
-
-            python3 -c "
-import yaml
-with open('$file', 'r') as f:
-    list(yaml.safe_load_all(f))
-print('✅ Valid:', '$file')
-"
+          find k8s/ -name "*.yaml" | while read file; do
+            python3 -c "import yaml,sys; list(yaml.safe_load_all(open('$file'))) and print('OK: $file')" || exit 1
           done
+          echo "All manifests valid!"
 
-          echo "✅ All Kubernetes manifests are valid."
-
-      - name: Check Terraform files exist
+      - name: Check Terraform files
         run: |
-          echo "Checking Terraform files..."
-
           ls terraform/*.tf
+          echo "All Terraform files present!"
+EOF
 
-          echo "✅ All Terraform files are present."
-```
