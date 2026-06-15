@@ -1,0 +1,33 @@
+# prometheus-values.yaml
+# Customizes the kube-prometheus-stack Helm chart
+
+grafana:
+  # Admin password for Grafana UI
+  adminPassword: "careerlens123"
+
+  # Persist Grafana dashboards across restarts
+  persistence:
+    enabled: true
+    size: 1Gi
+
+prometheus:
+  prometheusSpec:
+    # How long to keep metrics data
+    retention: 7d
+
+    # Storage for metrics
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+# Reduce resource usage for small cluster
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 50m

@@ -1,0 +1,2 @@
+NAME                 CLASS   HOSTS   ADDRESS                                                              PORTS   AGE
+careerlens-ingress   alb     *       k8s-dev-careerle-516535afa2-474913956.ap-south-1.elb.amazonaws.com   80      10h

@@ -1,0 +1,6 @@
+NAME                        READY   STATUS    RESTARTS   AGE
+backend-69667df48d-gjvgk    1/1     Running   0          10h
+backend-69667df48d-szkhg    1/1     Running   0          10h
+frontend-7c96c79686-4b5sm   1/1     Running   0          10h
+frontend-7c96c79686-mlbc2   1/1     Running   0          10h
+postgres-0                  1/1     Running   0          10h
