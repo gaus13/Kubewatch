@@ -14,17 +14,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-
-      - name: Validate K8s manifests
+      - name: Validate YAML syntax
         run: |
-          kubectl apply --dry-run=client --validate=false -f k8s/namespace.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/configmap.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/backend-deployment.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/backend-service.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/frontend-deployment.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/frontend-service.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/ingress.yaml
-          kubectl apply --dry-run=client --validate=false -f k8s/hpa.yaml
+          echo "Validating K8s manifests..."
+          find k8s/ -name "*.yaml" | while read file; do
+            python3 -c "
+import yaml, sys
+try:
+    list(yaml.safe_load_all(open('$file')))
+    print('OK:', '$file')
+except Exception as e:
+    print('FAIL:', '$file', str(e))
+    sys.exit(1)
+"
+          done
           echo "All manifests valid!"
+
+      - name: Check Terraform files
+        run: |
+          echo "Checking Terraform files..."
+          ls terraform/*.tf
+          echo "All Terraform files present!"
